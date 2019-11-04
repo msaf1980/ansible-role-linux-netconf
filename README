@@ -1,0 +1,142 @@
+Global variables:
+
+# Auto re-configure interface when changed (by default: false), also see 'configure' parameter on interface
+enable_interfaces: false | true
+
+----------------------------------
+interfaces:
+  # static ip
+  - name: enp4s0f0
+    dev: enp4s0f0
+    # Restart interface if configuration changed
+    configure: true
+    onboot: 'yes'
+    mac: 6c:f0:49:0b:fa:15
+
+    # IPv4 settings
+    method: 'static'
+    ipaddr: 192.168.0.251
+    # netmask with prefix
+    prefix: 24
+    # or
+    #netmask: 255.255.255.0
+    gateway: 192.168.0.1
+    # Set this interface as the default route
+    #defroute: true
+    # Overwrite resolv.conf
+    #peerdns: 'yes'
+    dns:
+      - 192.168.0.140
+      - 192.168.0.141
+      - 192.168.0.142
+    search:
+      - test.int
+      - dev.test.int
+
+  # dhcp ip
+  - name: enp4s0f1
+    dev: enp4s0f1
+    # Restart interface if configuration changed  
+    configure: true
+    onboot: 'yes'
+    mac: 6c:f0:49:0b:fa:16
+    # IPv4 settings
+    # netmask with prefix
+    prefix: 24
+
+    method: 'dhcp'
+    #defroute: true
+
+------------
+IP aliases
+
+alias_interfaces:    
+  # alias
+  - name: enp4s0f1:0
+    # Restart interface if configuration changed  
+    configure: true
+    onboot: 'yes'
+    # IPv4 settings
+    method: 'static'
+    ipaddr: 192.168.0.143
+    # netmask with prefix
+    prefix: 24
+
+
+Another variant
+
+interfaces:
+  .. 
+  # interface with multiply IP (additional variant for ip aliases)
+  - name: enp4s0f1
+    # Restart interface if configuration changed
+    configure: true
+    onboot: 'yes'
+    # IPv4 settings
+    method: 'none'
+    ip:
+      - ipaddr: 192.168.0.140
+        prefix: 24
+        gateway: 192.168.0.1
+      - ipaddr: 192.168.0.143
+        prefix: 24
+
+
+
+
+Additional settings
+    ethtool: 'speed 1000 duplex full autoneg on'
+    mtu: 9000
+    
+    # Auto re-configure interface when changed (by default: false)
+    configure: true
+    
+    # Change MAC address on interface (don't use with mac)
+    cloned_mac: <MACADDR>
+
+----------------------------------
+Bonding
+
+interfaces:
+  - name: eno1
+    dev: eno1
+    configure: true
+    onboot: 'yes'
+    mac: 6c:f0:49:0b:fa:15
+    master: bond0
+    
+  - name: eno2
+    dev: eno2
+    configure: true
+    onboot: 'yes'
+    mac: 6c:f0:49:0b:fa:16
+    master: bond0
+    
+bond_interfaces:    
+  - name: bond0
+    dev: bond0
+    # Restart interface if configuration changed  
+    configure: true
+    onboot: 'yes' 
+    type: 'Bond'
+    bond_opts: 'mode=active-backup primary=enp4s0f0 arp_interval=200 arp_ip_target=192.168.0.1,192.168.0.250'
+    
+-----------------------------------
+VLAN
+
+vlan_interfaces:
+  - name: bond1.252
+    dev: bond1.252
+    configure: true
+    onboot: 'yes'
+    method: 'static'
+    ipaddr: 192.168.252.240
+    prefix: 24
+    vlan: 'yes
+
+-----------------------------------
+Remove interface
+
+removed_interface:
+  - bond0:0
+  - bond0:2
