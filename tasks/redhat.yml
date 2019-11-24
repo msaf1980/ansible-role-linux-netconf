@@ -1,12 +1,4 @@
 ---
-- name: redhat | Installing Pre-Reqs
-  yum:
-    name: "lldpd"
-    state: "present"
-  become: true
-  when: >
-        config_lldpd and
-        ansible_distribution != "Fedora"
 
 - name: redhat | Installing bridge-utils
   yum:

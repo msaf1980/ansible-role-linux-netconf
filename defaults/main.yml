@@ -1,3 +1,2 @@
-config_lldpd: false         # Install lldpd
 enable_interfaces: false    # Enable configured interfaces
 
