@@ -1,0 +1,4 @@
+# configure proxy-servers
+- hosts: all
+  roles:
+    - role_under_test

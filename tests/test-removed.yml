@@ -1,0 +1,8 @@
+# configure proxy-servers
+- hosts: all
+  vars:
+    removed_interfaces:
+      - bond1:0
+      - bond1.252
+  roles:
+    - role_under_test

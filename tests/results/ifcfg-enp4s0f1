@@ -1,0 +1,10 @@
+NAME=enp4s0f1
+DEVICE=enp4s0f1
+ONBOOT=yes
+USERCTL=no
+
+
+BOOTPROTO=none
+MASTER=bond1
+SLAVE=yes
+

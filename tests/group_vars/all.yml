@@ -1,0 +1,99 @@
+linux_netconf_simulate: true
+rhbase_netconf_path: "/tmp"
+
+lan_gateway4: 192.168.0.1
+lan_dns_servers:
+  - 192.168.0.3
+  - 192.168.0.140
+  - 192.168.0.141
+lan_dns_search:
+  - test.int
+lan_arp_ip_target: "{{ lan_gateway4 }},192.168.0.250"
+
+host_name: virt0.test.int
+
+interfaces:
+  - name: eno1
+    dev: eno1
+    mac: 00:25:90:7e:91:d8
+    master: bond0
+
+  - name: eno2
+    dev: eno2
+    mac: 00:25:90:7e:91:d9
+    master: bond0
+
+  - name: eno3
+    dev: eno3
+    mac: 00:25:90:7e:91:f1
+    onboot: 'yes'
+    method: 'dhcp'
+
+  - name: enp4s0f0
+    dev: enp4s0f0
+    mac: 00:10:18:c4:ee:58
+    master: bond1
+
+  - name: enp4s0f1
+    dev: enp4s0f1
+    mac: 00:10:18:c4:ee:5a
+    master: bond1
+
+bond_interfaces:
+  - name: bond0
+    dev: bond0
+    type: 'Bond'
+    bridge: 'br0'
+    bond_opts: 'mode=balance-rr arp_interval=200 arp_ip_target={{ lan_arp_ip_target }}'
+    #method: 'static'
+    #ipaddr: 192.168.0.140
+    #prefix: 24
+    #gateway: "{{ lan_gateway4 }}"
+    #dns: "{{ lan_dns_servers }}"
+    #search: "{{ lan_dns_search }}"
+
+  - name: bond1
+    dev: bond1
+    type: 'Bond'
+    bond_opts: 'mode=802.3ad xmit_hash_policy=layer2+3 lacp_rate=1 miimon=100'
+    method: 'static'
+    ipaddr: 192.168.251.140
+    prefix: 24
+    mtu: 9000
+
+alias_interfaces:
+  - name: bond1:0
+    dev: bond1:0
+    onboot: 'yes'
+    method: 'static'
+    ipaddr: 192.168.251.240
+    prefix: 24
+
+vlan_interfaces:
+  - name: bond1.252
+    dev: bond1.252
+    onboot: 'yes'
+    method: 'static'
+    ipaddr: 192.168.252.240
+    prefix: 24
+    vlan: 'yes'
+  - name: bond1.253
+    dev: bond1.253
+    onboot: 'yes'
+    method: 'static'
+    ipaddr: 192.168.253.240
+    prefix: 24
+    vlan: 'yes'
+
+bridge_interfaces:
+  - name: br0
+    dev: br0
+    type: 'Bridge'
+    onboot: 'yes'
+    method: 'static'
+    ip:
+      - ipaddr: 192.168.0.142
+        prefix: 24
+        gateway: 192.168.0.1
+      - ipaddr: 192.168.0.143
+        prefix: 24

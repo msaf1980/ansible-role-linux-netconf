@@ -145,11 +145,12 @@
 
 - name: Network | Down Network Interfaces
   shell: ifdown {{ item['item'] }}
-  when: removed_interfaces is defined and item['stat']['exists'] == True
+  when:
+    - removed_interfaces is defined
+    - item['stat']['exists'] == True
+    - not linux_netconf_simulate
   become: true
   with_items: "{{ config_removed['results'] }}"
-  when: >
-        not linux_netconf_simulate
 
 - name: Network | Remove Network Interfaces
   file: path={{ rhbase_netconf_path }}/ifcfg-{{ item['item'] }} state=absent

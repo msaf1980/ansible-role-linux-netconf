@@ -1,0 +1,15 @@
+NAME=bond1
+DEVICE=bond1
+TYPE=Bond
+ONBOOT=yes
+USERCTL=no
+
+BONDING_OPTS="mode=802.3ad xmit_hash_policy=layer2+3 lacp_rate=1 miimon=100"
+
+BOOTPROTO=static
+IPADDR=192.168.251.140
+PREFIX=24
+
+IPV6INIT=no
+MTU=9000
+
