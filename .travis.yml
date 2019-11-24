@@ -1,0 +1,19 @@
+---
+sudo: required
+
+env:
+  matrix:
+    - DISTRIBUTION: centos
+      VERSION: 7
+services:
+  - docker
+
+before_install:
+  # Install latest Git
+  - sudo apt-get update
+  - sudo apt-get install --only-upgrade git
+  - sudo apt-get install python-pip || sudo apt-get install python3-pip
+  - sudo pip install yamllint ansible-lint || sudo pip3 install yamllint ansible-lint
+
+script:
+  - ./tests/docker-tests.sh
