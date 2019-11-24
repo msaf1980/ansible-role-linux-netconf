@@ -1,6 +1,6 @@
 ---
 
-- name: redhat | Installing bridge-utils
+- name: Network | Installing bridge-utils
   yum:
     name: "bridge-utils"
   become: true
@@ -8,7 +8,7 @@
         bridge_interfaces is defined and
         ansible_distribution != "Fedora"
 
-#- name: redhat | Installing VLAN Packages
+#- name: Network | Installing VLAN Packages
 #  yum:
 #    name: "vconfig"
 #    state: "present"
@@ -17,64 +17,66 @@
 #        vlan_interfaces is defined and
 #        ansible_distribution != "Fedora"
 
-- name: redhat | Enabling Bonding
+- name: Network | Enabling Bonding
   modprobe:
     name: "bonding"
     state: "present"
   become: true
-  when: bond_interfaces is defined
+  when:
+    - bond_interfaces is defined
+    - not linux_netconf_simulate
 
-- name: redhat | Enabling Bridging
+- name: Network | Enabling Bridging
   modprobe:
     name: "bridge"
     state: "present"
   become: true
   when: bridge_interfaces is defined
 
-- name: redhat | Configuring Interfaces
+- name: Network | Configuring Interfaces
   template:
-    src: "etc/sysconfig/network-scripts/ifcfg.j2"
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item['name'] }}"
+    src: "redhat/ifcfg.j2"
+    dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
   register: "config_interface"
   become: true
   with_items: '{{ interfaces }}'
   when: >
-        interfaces is defined 
+        interfaces is defined
 
-- name: redhat | Configuring Bonds
+- name: Network | Configuring Bonds
   template:
-    src: "etc/sysconfig/network-scripts/ifcfg.j2"
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item['name'] }}"
+    src: "redhat/ifcfg.j2"
+    dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
   register: "config_bond"
   become: true
   with_items: '{{ bond_interfaces }}'
   when: >
         bond_interfaces is defined
 
-- name: redhat | Configuring Bridges
+- name: Network | Configuring Bridges
   template:
-    src: "etc/sysconfig/network-scripts/ifcfg.j2"
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item['name'] }}"
+    src: "redhat/ifcfg.j2"
+    dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
   register: "config_bridge"
   become: true
   with_items: '{{ bridge_interfaces }}'
   when: >
         bridge_interfaces is defined
 
-- name: redhat | Configuring Aliases
+- name: Network | Configuring Aliases
   template:
-    src: "etc/sysconfig/network-scripts/ifcfg.j2"
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item['name'] }}"
+    src: "redhat/ifcfg.j2"
+    dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
   register: "config_alias"
   become: true
   with_items: '{{ alias_interfaces }}'
   when: >
         alias_interfaces is defined
 
-- name: redhat | Configuring VLANs
+- name: Network | Configuring VLANs
   template:
-    src: "etc/sysconfig/network-scripts/ifcfg.j2"
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item['name'] }}"
+    src: "redhat/ifcfg.j2"
+    dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
   register: "config_vlan"
   become: true
   with_items: '{{ vlan_interfaces }}'
@@ -82,73 +84,77 @@
         vlan_interfaces is defined
 
 
-- name: redhat | Restarting Network Bonds
+- name: Network | Restarting Network Bonds
   shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
   become: true
   with_items: "{{ config_bond['results'] }}"
   when: >
         config_bond['results'] is defined and
-        enable_interfaces and
+        enable_interfaces and not linux_netconf_simulate and
         item['item']['configure']|default(false)
         and item['changed']
-        
-- name: redhat | Restarting Network Bridges
+
+- name: Network | Restarting Network Bridges
   shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
   become: true
   with_items: "{{ config_bridge['results'] }}"
   when: >
         config_bridge['results'] is defined and
-        enable_interfaces and
+        enable_interfaces and not linux_netconf_simulate and
         item['item']['configure']|default(false)
         and item['changed']
 
-- name: redhat | Restarting Network Interfaces
+- name: Network | Restarting Network Interfaces
   shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
   become: true
   with_items: "{{ config_interface['results'] }}"
   when: >
         config_interface['results'] is defined and
-        enable_interfaces and
+        enable_interfaces and not linux_netconf_simulate and
         item['item']['configure']|default(false)
         and item['changed']
+        and not linux_netconf_simulate
 
-- name: redhat | Restarting Network Interfaces (Aliases)
+- name: Network | Restarting Network Interfaces (Aliases)
   shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
   become: true
   with_items: "{{ config_alias['results'] }}"
   when: >
         config_alias['results'] is defined and
-        enable_interfaces and
+        enable_interfaces and not linux_netconf_simulate and
         item['item']['configure']|default(false)
         and item['changed']
 
-- name: redhat | Restarting VLAN Interfaces
+- name: Network | Restarting VLAN Interfaces
   shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
   become: true
   with_items: "{{ config_vlan['results'] }}"
   when: >
         config_vlan['results'] is defined and
-        enable_interfaces and
+        enable_interfaces and not linux_netconf_simulate and
         item['item']['configure']|default(false)
         and item['changed']
 
-- name: redhat | Get Shutdown Network Interfaces
-  stat: path="/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
+- name: Network | Get Shutdown Network Interfaces
+  stat: path="{{ rhbase_netconf_path }}/ifcfg-{{ item }}"
   register: config_removed
   changed_when: true
   with_items: "{{ removed_interfaces }}"
   when: >
         removed_interfaces is defined
 
-- name: redhat | Down Network Interfaces
+- name: Network | Down Network Interfaces
   shell: ifdown {{ item['item'] }}
   when: removed_interfaces is defined and item['stat']['exists'] == True
   become: true
   with_items: "{{ config_removed['results'] }}"
+  when: >
+        not linux_netconf_simulate
 
-#- name: redhat | Remove Network Interfaces
-#  file: path=/etc/sysconfig/network-scripts/ifcfg-{{ item['item'] }} state=absent
-#  become: true
-#  with_items: "{{ config_removed['results'] }}"
-#  when: >
-#        config_removed['results'] is defined  
+- name: Network | Remove Network Interfaces
+  file: path={{ rhbase_netconf_path }}/ifcfg-{{ item['item'] }} state=absent
+  become: true
+  with_items: "{{ config_removed['results'] }}"
+  when: >
+        config_removed['results'] is defined
+

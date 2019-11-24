@@ -50,7 +50,7 @@ interfaces:
 ------------
 IP aliases
 
-alias_interfaces:    
+alias_interfaces:
   # alias
   - name: enp4s0f1:0
     # Restart interface if configuration changed  
