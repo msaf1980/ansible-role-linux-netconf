@@ -75,6 +75,9 @@ DOMAIN={% for search in item['search'] %}{{ search }}{% if not loop.last %} {% e
 {%		endif %}
 
 IPV6INIT=no
+{%		if item['zone'] is defined %}
+ZONE={{ item['zone'] }}
+{%		endif %}
 {%		if item['mtu'] is defined %}
 MTU={{ item['mtu'] }}
 {%		endif %}

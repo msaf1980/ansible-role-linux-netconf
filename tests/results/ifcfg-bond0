@@ -8,3 +8,4 @@ BRIDGE=br0
 BONDING_OPTS="mode=balance-rr arp_interval=200 arp_ip_target=192.168.0.1,192.168.0.250"
 
 IPV6INIT=no
+ZONE=public

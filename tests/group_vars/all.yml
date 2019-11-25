@@ -60,6 +60,7 @@ bond_interfaces:
     ipaddr: 192.168.251.140
     prefix: 24
     mtu: 9000
+    zone: 'public'
 
 alias_interfaces:
   - name: bond1:0
@@ -84,6 +85,7 @@ vlan_interfaces:
     ipaddr: 192.168.253.240
     prefix: 24
     vlan: 'yes'
+    zone: 'public'
 
 bridge_interfaces:
   - name: br0
@@ -91,6 +93,7 @@ bridge_interfaces:
     type: 'Bridge'
     onboot: 'yes'
     method: 'static'
+    zone: 'public'
     ip:
       - ipaddr: 192.168.0.142
         prefix: 24
