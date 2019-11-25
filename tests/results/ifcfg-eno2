@@ -3,8 +3,6 @@ DEVICE=eno2
 ONBOOT=yes
 USERCTL=no
 
-
 BOOTPROTO=none
 MASTER=bond0
 SLAVE=yes
-

@@ -10,22 +10,24 @@ USERCTL=no
 {%	if  item['bridge'] is defined %}
 BRIDGE={{ item['bridge'] }}
 {%	endif %}
-
 {%	if  item['bond_opts'] is defined %}
+
 BONDING_OPTS="{{ item['bond_opts'] }}"
 {%	endif %}
-
 {%	if item['master'] is defined %}
+
 BOOTPROTO=none
 MASTER={{ item['master'] }}
 SLAVE=yes
 {%	elif item['team_master'] is defined %}
+
 BOOTPROTO=none
 TEAM_MASTER={{ item['team_master'] }}
 {%		if item['team_port_config'] is defined %}
 TEAM_PORT_CONFIG="{{ item['team_port_config'] }}"
 {%		endif %}
 {%	else %}
+
 {%		if item['method'] is defined %}
 BOOTPROTO={{ item['method']|lower }}
 {%		endif %}
@@ -83,4 +85,3 @@ ETHTOOL_OPTS={{ item['ethtool'] }}
 VLAN={{ item['vlan'] }}
 {%		endif %}
 {%	endif %}
-
