@@ -87,10 +87,10 @@ interfaces:
 Additional settings
     ethtool: 'speed 1000 duplex full autoneg on'
     mtu: 9000
-    
+
     # Auto re-configure interface when changed (by default: false)
     configure: true
-    
+
     # Change MAC address on interface (don't use with mac)
     cloned_mac: <MACADDR>
 
@@ -104,15 +104,15 @@ interfaces:
     onboot: 'yes'
     mac: 6c:f0:49:0b:fa:15
     master: bond0
-    
+
   - name: eno2
     dev: eno2
     configure: true
     onboot: 'yes'
     mac: 6c:f0:49:0b:fa:16
     master: bond0
-    
-bond_interfaces:    
+
+bond_interfaces:
   - name: bond0
     dev: bond0
     # Restart interface if configuration changed  
