@@ -1,0 +1,5 @@
+# Ansible managed
+# Any changes made here will be lost
+auto eno2
+allow-hotplug eno2
+iface eno2 inet manual

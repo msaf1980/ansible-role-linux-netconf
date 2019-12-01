@@ -1,0 +1,191 @@
+---
+
+- name: Network | Installing bridge-utils
+  apt:
+    name: "bridge-utils"
+  become: true
+  when: >
+        bridge_interfaces is defined
+
+- name: Network | Installing VLAN Packages
+  apt:
+    name: "vlan"
+    state: "present"
+  become: true
+  when: >
+        vlan_interfaces is defined
+
+- name: Network | Installing Required Packages
+  apt:
+    name: "{{ netconf_required_packages }}"
+    state: "present"
+  become: true
+  when: not linux_netconf_simulate
+
+- name: Network | Enabling Bonding
+  modprobe:
+    name: "bonding"
+    state: "present"
+  become: true
+  when:
+    - bond_interfaces is defined
+    - not linux_netconf_simulate
+
+- name: Network | Enabling Bridging
+  modprobe:
+    name: "bridge"
+    state: "present"
+  become: true
+  when: bridge_interfaces is defined
+
+- name: Network | Configuring Interfaces Includes
+  template:
+    src: "debian/interfaces.j2"
+    dest: "{{ debbase_netconf_path }}/interfaces"
+    mode: 0640
+  become: true
+
+- name: Network | Configuring Interfaces
+  template:
+    src: "debian/interface.j2"
+    dest: "{{ debbase_netconf_interface_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
+  register: "config_interface"
+  vars:
+    interface_type: ''
+  become: true
+  with_items: '{{ interfaces }}'
+  when: >
+        interfaces is defined
+
+- name: Network | Configuring Bonds
+  template:
+    src: "debian/interface.j2"
+    dest: "{{ debbase_netconf_interface_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
+  register: "config_bond"
+  vars:
+    interface_type: 'Bond'
+    interface_is_vlan: false
+  become: true
+  with_items: '{{ bond_interfaces }}'
+  when: >
+        bond_interfaces is defined
+
+- name: Network | Configuring Bridges
+  template:
+    src: "debian/interface.j2"
+    dest: "{{ debbase_netconf_interface_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
+  register: "config_bridge"
+  vars:
+    interface_type: 'Bridge'
+    interface_is_vlan: false
+  become: true
+  with_items: '{{ bridge_interfaces }}'
+  when: >
+        bridge_interfaces is defined
+
+- name: Network | Configuring Aliases
+  template:
+    src: "debian/interface.j2"
+    dest: "{{ debbase_netconf_interface_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
+  register: "config_alias"
+  vars:
+    interface_type: ''
+    interface_is_vlan: false
+  become: true
+  with_items: '{{ alias_interfaces }}'
+  when: >
+        alias_interfaces is defined
+
+- name: Network | Configuring VLANs
+  template:
+    src: "debian/interface.j2"
+    dest: "{{ debbase_netconf_interface_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
+  register: "config_vlan"
+  vars:
+    interface_type: ''
+    interface_is_vlan: true
+  become: true
+  with_items: '{{ vlan_interfaces }}'
+  when: >
+        vlan_interfaces is defined
+
+
+- name: Network | Restarting Network Bonds
+  shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
+  become: true
+  with_items: "{{ config_bond['results'] }}"
+  when: >
+        config_bond['results'] is defined and
+        enable_interfaces and not linux_netconf_simulate and
+        item['item']['configure']|default(false)
+        and item['changed']
+
+- name: Network | Restarting Network Bridges
+  shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
+  become: true
+  with_items: "{{ config_bridge['results'] }}"
+  when: >
+        config_bridge['results'] is defined and
+        enable_interfaces and not linux_netconf_simulate and
+        item['item']['configure']|default(false)
+        and item['changed']
+
+- name: Network | Restarting Network Interfaces
+  shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
+  become: true
+  with_items: "{{ config_interface['results'] }}"
+  when: >
+        config_interface['results'] is defined and
+        enable_interfaces and not linux_netconf_simulate and
+        item['item']['configure']|default(false)
+        and item['changed']
+        and not linux_netconf_simulate
+
+- name: Network | Restarting Network Interfaces (Aliases)
+  shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
+  become: true
+  with_items: "{{ config_alias['results'] }}"
+  when: >
+        config_alias['results'] is defined and
+        enable_interfaces and not linux_netconf_simulate and
+        item['item']['configure']|default(false)
+        and item['changed']
+
+- name: Network | Restarting VLAN Interfaces
+  shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
+  become: true
+  with_items: "{{ config_vlan['results'] }}"
+  when: >
+        config_vlan['results'] is defined and
+        enable_interfaces and not linux_netconf_simulate and
+        item['item']['configure']|default(false)
+        and item['changed']
+
+- name: Network | Get Shutdown Network Interfaces
+  stat: path="{{ rhbase_netconf_path }}/ifcfg-{{ item }}"
+  register: config_removed
+  changed_when: true
+  with_items: "{{ removed_interfaces }}"
+  when: >
+        removed_interfaces is defined
+
+- name: Network | Down Network Interfaces
+  shell: ifdown {{ item['item'] }}
+  when:
+    - removed_interfaces is defined
+    - item['stat']['exists'] == True
+    - not linux_netconf_simulate
+  become: true
+  with_items: "{{ config_removed['results'] }}"
+
+- name: Network | Remove Network Interfaces
+  file: path={{ rhbase_netconf_path }}/ifcfg-{{ item['item'] }} state=absent
+  become: true
+  with_items: "{{ config_removed['results'] }}"
+  when: >
+        config_removed['results'] is defined

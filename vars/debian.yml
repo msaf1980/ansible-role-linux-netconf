@@ -1,0 +1,5 @@
+---
+
+netconf_required_packages:
+  - "ethtool"
+  - "resolvconf"

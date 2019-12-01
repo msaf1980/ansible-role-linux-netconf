@@ -1,0 +1,60 @@
+# {{ ansible_managed }}
+# Any changes made here will be lost
+{%	if item['comment'] is defined %}
+# item['comment']
+{%	endif %}
+{%	if item['onboot']|default('yes') == 'yes' %}
+auto {{ item['name'] }}
+{%	endif %}
+{%	if item['hotplug']|default('yes') == 'yes' %}
+allow-hotplug {{ item['name'] }}
+{%	endif %}
+{%	if  interface_is_vlan is defined and interface_is_vlan %}
+iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
+  vlan-raw-device {{ item['dev'] }}
+{%	else %}
+iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
+{%	endif %}
+{%	if item['method'] is defined and item['method']|lower == "static" %}
+{%		if item['netmask'] is defined %}
+  address {{ item['ipaddr'] }}
+  netmask {{ item['netmask'] }}
+{%		else %}
+  address {{ item['ipaddr'] }}/{{ item['prefix'] }}
+{%		endif %}
+{%		if item['gw'] is defined %}
+  gateway {{ item['gw'] }}
+{%		endif %}
+{%	endif %}
+{%	if item['wireless_network'] is defined and item['wireless_network'] %}
+  wpa-ssid {{ item['wpa_ssid'] }}
+  wpa-psk {{ item['wpa_psk'] }}
+{%	endif %}
+{%	if interface_type == 'Bond' %}
+{%		for opt in item['parameters'] %}
+  bond-{{ opt['param'] }} {{ opt['val'] }}
+{%		endfor %}
+  slaves{% for s in item['slaves'] %} {{ s }}{% endfor %}
+{%		if item['mtu'] is defined %}
+  post-up {% for s in item['slaves'] %}ip link set dev {{ s }} mtu {{ item['mtu'] }} && {% endfor %}ip link set dev {{ item['name'] }} mtu {{ item['mtu'] }}
+{%		endif %}
+{%	else %}
+{%		if item['mtu'] is defined %}
+  mtu {{ item['mtu'] }}
+{%		endif %}
+{%	endif %}
+{%	if item['ip'] is defined and (item['method'] is undefined or item['method']|lower == "static" or item['method']|lower == "manual") %}
+
+iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
+{%		for ip in item['ip'] %}
+{%			if ip['netmask'] is defined %}
+  address {{ ip['ipaddr'] }}
+  netmask {{ ip['netmask'] }}
+{%			else %}
+  address {{ ip['ipaddr'] }}/{{ ip['prefix'] }}
+{%			endif %}
+{%			if ip['gw'] is defined %}
+  gateway {{ ip['gw'] }}
+{%			endif %}
+{%		endfor %}
+{%	endif %}
