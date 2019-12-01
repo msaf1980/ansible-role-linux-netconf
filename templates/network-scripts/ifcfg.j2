@@ -1,0 +1,105 @@
+# {{ ansible_managed }}
+# Any changes made here will be lost
+{%	if item['comment'] is defined %}
+# item['comment']
+{%	endif %}
+NAME={{ item['name'] }}
+{%	if  interface_is_vlan is defined and interface_is_vlan %}
+DEVICE={{ item['dev'] }}.{{ item['vlan_id'] }}
+VLAN=yes
+{%	else %}
+DEVICE={{ item['dev'] }}
+{%	endif %}
+{%	if interface_type is defined and interface_type != '' %}
+TYPE={{ interface_type }}
+{%	endif %}
+ONBOOT={{ item['onboot']|default('yes') }}
+USERCTL=no
+{%	if interface_type is undefined or interface_type == '' %}
+{%		if item['mac'] is defined %}
+HWADDR={{ item['mac']|lower }}
+{%		elif item['cloned_mac'] is defined %}
+MACADDR={{ item['cloned_mac']|lower }}
+{%		endif %}
+{%		if bond_interfaces is defined %}
+{%			for nb in bond_interfaces %}
+{%				for slave in nb['slaves'] %}
+{%					if slave == item['name'] %}
+MASTER={{ nb['name'] }}
+SLAVE=yes
+{%					endif %}
+{%				endfor %}
+{%			endfor %}
+{%		endif %}
+{%	endif %}
+{%	if  item['ethtool'] is defined %}
+ETHTOOL_OPTS={{ item['ethtool'] }}
+{%	endif %}
+{%	if interface_type == 'Bond' %}
+BONDING_OPTS="{% for opt in item['parameters'] %}{{ opt['param'] }}={{ opt['val'] }}{% if not loop.last %} {% endif %}{% endfor %}"
+
+{%	elif interface_type == 'Bridge' %}
+{%		if (item.stp is defined) and (item.stp == 'no' or item.stp == 'off') %}
+STP=off
+{%		else %}
+STP=on
+{%		endif %}
+{%	endif %}
+{%	if item['method'] is defined %}
+BOOTPROTO={{ item['method']|lower }}
+{%	endif %}
+IPV6INIT=no
+{%	if bridge_interfaces is defined %}
+{%		for nbr in bridge_interfaces %}
+{%			for port in nbr['ports'] %}
+{%				if port == item['name'] %}
+BRIDGE={{ nbr['name'] }}
+DELAY=0
+{%				endif %}
+{%			endfor %}
+{%		endfor %}
+{%	endif %}
+{%	if item['method'] is defined and item['method']|lower == 'static' %}
+IPADDR={{ item['ipaddr'] }}
+{%		if item['netmask'] is defined %}
+NETMASK={{ item['netmask'] }}
+{%		elif item['prefix'] is defined %}
+PREFIX={{ item['prefix'] }}
+{%		endif %}
+{%		if item['gw'] is defined %}
+GATEWAY={{ item['gw'] }}
+{%		endif %}
+{%	if item['ip'] is defined %}
+{%		for ip in item['ip'] %}
+IPADDR{{ loop.index }}={{ ip['ipaddr'] }}
+{%			if ip['netmask'] is defined %}
+NETMASK{{ loop.index }}={{ ip['netmask'] }}
+{%			elif ip['prefix'] is defined %}
+PREFIX{{ loop.index }}={{ ip['prefix'] }}
+{%			endif %}
+{%			if ip['gw'] is defined %}
+GATEWAY{{ loop.index }}={{ ip['gw'] }}
+{%			endif %}
+{%		endfor %}
+{%	endif %}
+{%	elif item['method'] is defined and item['method']|lower == 'dhcp' %}
+PEERROUTES={{ item['peerroutes']|default('yes') }}
+{%		if item['defroute'] is defined and item['defroute'] %}
+DEFROUTE=yes
+{%		endif %}
+{%	endif %}
+PEERDNS={{ item['peerdns']|default('yes') }}
+{%	if item['dns'] is defined %}
+{%		for ns in item['dns'] %}
+DNS{{ loop.index }}={{ ns }}
+{%		endfor %}
+{%	endif %}
+{%	if item['search'] is defined %}
+DOMAIN={% for search in item['search'] %}{{ search }}{% if not loop.last %} {% endif %}{% endfor %}
+{%	endif %}
+{%	if item['zone'] is defined %}
+ZONE={{ item['zone'] }}
+{%	endif %}
+{%	if item['mtu'] is defined %}
+MTU={{ item['mtu'] }}
+{%	endif %}

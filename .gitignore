@@ -13,6 +13,8 @@
 .ropeproject
 *.pyc
 
+*.swp
+
 # Ignore test directory
 vagrant-tests/
 docker-tests/

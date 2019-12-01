@@ -1,0 +1,11 @@
+# Ansible managed
+# Any changes made here will be lost
+NAME=eno1
+DEVICE=eno1
+ONBOOT=yes
+USERCTL=no
+HWADDR=00:25:90:7e:91:d8
+MASTER=bond0
+SLAVE=yes
+IPV6INIT=no
+PEERDNS=yes

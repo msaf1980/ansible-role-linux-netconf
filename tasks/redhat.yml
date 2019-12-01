@@ -8,14 +8,20 @@
         bridge_interfaces is defined and
         ansible_distribution != "Fedora"
 
-#- name: Network | Installing VLAN Packages
-#  yum:
-#    name: "vconfig"
-#    state: "present"
-#  become: true
-#  when: >
-#        vlan_interfaces is defined and
-#        ansible_distribution != "Fedora"
+- name: Network | Installing VLAN Packages
+  yum:
+    name: "vconfig"
+    state: "present"
+  become: true
+  when: >
+        vlan_interfaces is defined and
+        ansible_distribution != "Fedora"
+
+- name: Network | Installing Required Packages
+  yum:
+    name: "{{ netconf_required_packages }}"
+    state: "present"
+  become: true
 
 - name: Network | Enabling Bonding
   modprobe:
@@ -35,9 +41,12 @@
 
 - name: Network | Configuring Interfaces
   template:
-    src: "redhat/ifcfg.j2"
+    src: "network-scripts/ifcfg.j2"
     dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
   register: "config_interface"
+  vars:
+    interface_type: ''
   become: true
   with_items: '{{ interfaces }}'
   when: >
@@ -45,9 +54,13 @@
 
 - name: Network | Configuring Bonds
   template:
-    src: "redhat/ifcfg.j2"
+    src: "network-scripts/ifcfg.j2"
     dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
   register: "config_bond"
+  vars:
+    interface_type: 'Bond'
+    interface_is_vlan: false
   become: true
   with_items: '{{ bond_interfaces }}'
   when: >
@@ -55,9 +68,13 @@
 
 - name: Network | Configuring Bridges
   template:
-    src: "redhat/ifcfg.j2"
+    src: "network-scripts/ifcfg.j2"
     dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
   register: "config_bridge"
+  vars:
+    interface_type: 'Bridge'
+    interface_is_vlan: false
   become: true
   with_items: '{{ bridge_interfaces }}'
   when: >
@@ -65,9 +82,13 @@
 
 - name: Network | Configuring Aliases
   template:
-    src: "redhat/ifcfg.j2"
+    src: "network-scripts/ifcfg.j2"
     dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
   register: "config_alias"
+  vars:
+    interface_type: ''
+    interface_is_vlan: false
   become: true
   with_items: '{{ alias_interfaces }}'
   when: >
@@ -75,14 +96,29 @@
 
 - name: Network | Configuring VLANs
   template:
-    src: "redhat/ifcfg.j2"
+    src: "network-scripts/ifcfg.j2"
     dest: "{{ rhbase_netconf_path }}/ifcfg-{{ item['name'] }}"
+    mode: 0640
   register: "config_vlan"
+  vars:
+    interface_type: ''
+    interface_is_vlan: true
   become: true
   with_items: '{{ vlan_interfaces }}'
   when: >
         vlan_interfaces is defined
 
+- name: Network | Configuring routes
+  template:
+    src: "network-scripts/routes.j2"
+    dest: "{{ rhbase_netconf_path }}/route-{{ item['name'] }}"
+    mode: 0640
+  when: >
+        item['routes'] is defined
+  with_items:
+    - "{{ interfaces | default([]) }}"
+    - "{{ bond_interfaces | default([]) }}"
+    - "{{ vlan_interfaces | default([]) }}"
 
 - name: Network | Restarting Network Bonds
   shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
@@ -143,7 +179,7 @@
   when: >
         removed_interfaces is defined
 
-- name: Network | Down Network Interfaces
+- name: Network | Shutdown Network Interfaces
   shell: ifdown {{ item['item'] }}
   when:
     - removed_interfaces is defined
@@ -158,4 +194,3 @@
   with_items: "{{ config_removed['results'] }}"
   when: >
         config_removed['results'] is defined
-

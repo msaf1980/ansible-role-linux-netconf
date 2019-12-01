@@ -103,14 +103,12 @@ interfaces:
     configure: true
     onboot: 'yes'
     mac: 6c:f0:49:0b:fa:15
-    master: bond0
 
   - name: eno2
     dev: eno2
     configure: true
     onboot: 'yes'
     mac: 6c:f0:49:0b:fa:16
-    master: bond0
 
 bond_interfaces:
   - name: bond0
@@ -119,20 +117,42 @@ bond_interfaces:
     configure: true
     onboot: 'yes' 
     type: 'Bond'
-    bond_opts: 'mode=active-backup primary=enp4s0f0 arp_interval=200 arp_ip_target=192.168.0.1,192.168.0.250'
-    
+    slaves:
+      - "eno1"
+      - "eno2"
+    options: 'mode=active-backup primary=enp4s0f0 arp_interval=200 arp_ip_target=192.168.0.1,192.168.0.250'
+
 -----------------------------------
 VLAN
 
 vlan_interfaces:
   - name: bond1.252
-    dev: bond1.252
+    dev: bond1
+    vlan: 252
     configure: true
     onboot: 'yes'
     method: 'static'
     ipaddr: 192.168.252.240
     prefix: 24
-    vlan: 'yes
+
+-----------------------------------
+Bridge
+
+bridge_interfaces:
+  - name: br0
+    dev: br0
+    type: 'Bridge'
+    #stp: 'off'
+    ports:
+      - 'bond0'
+    method: 'static'
+    zone: 'public'
+    ip:
+      - ipaddr: 192.168.0.142
+        prefix: 24
+        gateway: 192.168.0.1
+      - ipaddr: 192.168.0.143
+        prefix: 24
 
 -----------------------------------
 Remove interface

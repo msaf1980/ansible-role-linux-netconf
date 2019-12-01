@@ -3,3 +3,5 @@ enable_interfaces: false    # Enable configured interfaces
 linux_netconf_simulate: false  # Don't enable modules and configure interfaces (for testing in docker)
 
 rhbase_netconf_path: "/etc/sysconfig/network-scripts"
+debbase_netconf_path: "/etc/network"
+debbase_netconf_interface_path: "/etc/network/interfaces.d"

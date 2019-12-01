@@ -1,0 +1,17 @@
+# Ansible managed
+# Any changes made here will be lost
+NAME=br0
+DEVICE=br0
+TYPE=Bridge
+ONBOOT=yes
+USERCTL=no
+STP=on
+BOOTPROTO=static
+IPV6INIT=no
+IPADDR=192.168.0.142
+PREFIX=24
+GATEWAY=192.168.0.1
+IPADDR1=192.168.0.143
+PREFIX1=24
+PEERDNS=yes
+ZONE=public

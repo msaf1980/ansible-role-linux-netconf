@@ -1,0 +1,12 @@
+# Ansible managed
+# Any changes made here will be lost
+NAME=eno3
+DEVICE=eno3
+ONBOOT=yes
+USERCTL=no
+HWADDR=00:25:90:7e:91:f1
+BOOTPROTO=dhcp
+IPV6INIT=no
+PEERROUTES=yes
+PEERDNS=yes
+MTU=9000

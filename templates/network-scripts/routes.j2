@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+# Any changes made here will be lost
+{%	if item.routes is defined and (item.routes|length >= 1) and (item.routes[0].to == 'default') %}
+{%		if  item.vlan_id is defined %}
+default via dev {{ item['dev'] }}.{{ item['vlan_id'] }}
+{%		else %}
+default via dev {{ item.dev }}
+{%		endif %}
+{%	elif (item.routes is defined) and (item.routes[0].to != 'default') %}
+{%		for route in item.routes %}
+{%			if route.gw is defined %}
+{{ route.to }} via {{ route.gw }}
+{%			else %}
+{%				if  item.vlan_id is defined %}
+{{ route.to }} via dev {{ item['dev'] }}.{{ item['vlan_id'] }}
+{%				else %}
+{{ route.to }} via dev {{ item.dev }}
+{%				endif %}
+{%			endif %}
+{%		endfor %}
+{%	endif %}

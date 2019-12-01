@@ -1,6 +1,10 @@
 # configure proxy-servers
 - hosts: all
   vars:
+    linux_netconf_simulate: true
+    rhbase_netconf_path: "/tmp"
+    debbase_netconf_path: "/tmp"
+    debbase_netconf_interface_path: "/tmp"
     removed_interfaces:
       - bond1:0
       - bond1.252

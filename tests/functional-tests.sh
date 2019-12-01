@@ -3,9 +3,16 @@
 RES=0
 
 if [ -f /etc/redhat-release ]; then
-	for file in $( ls ${1}/tests/results ); do
-		diff -uB ${1}/tests/results/${file} tmp/${file} || RES=1
+	for file in $( ls ${1}/tests/results/network-scripts ); do
+		diff -uB ${1}/tests/results/network-scripts/${file} /tmp/${file} || RES=1
 	done
+elif [ -f /etc/debian_version ]; then
+	for file in $( ls ${1}/tests/results/debian ); do
+		diff -uB ${1}/tests/results/debian/${file} /tmp/${file} || RES=1
+	done
+else
+	echo "Untested OS" >&2
+	RES=1
 fi
 
 exit ${RES}
