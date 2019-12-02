@@ -1,0 +1,10 @@
+# Ansible managed
+# Any changes made here will be lost
+auto bond0
+allow-hotplug bond0
+iface bond0 inet manual
+  slaves eno1 eno2
+  bond-mode balance-rr
+  bond-arp-interval 200
+  bond-arp-ip-target 192.168.0.1,192.168.0.250
+

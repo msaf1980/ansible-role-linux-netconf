@@ -31,10 +31,11 @@ iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
   wpa-psk {{ item['wpa_psk'] }}
 {%	endif %}
 {%	if interface_type == 'Bond' %}
-{%		for opt in item['parameters'] %}
-  bond-{{ opt['param'] }} {{ opt['val'] }}
-{%		endfor %}
   slaves{% for s in item['slaves'] %} {{ s }}{% endfor %}
+
+{%		for opt in item['parameters'] %}
+  bond-{{ opt['param']|replace('_','-') }} {{ opt['val'] }}
+{%		endfor %}
 {%		if item['mtu'] is defined %}
   post-up {% for s in item['slaves'] %}ip link set dev {{ s }} mtu {{ item['mtu'] }} && {% endfor %}ip link set dev {{ item['name'] }} mtu {{ item['mtu'] }}
 {%		endif %}

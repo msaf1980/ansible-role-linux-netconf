@@ -1,0 +1,12 @@
+# Ansible managed
+# Any changes made here will be lost
+auto br0
+allow-hotplug br0
+iface br0 inet static
+  address 192.168.0.142/24
+  gateway 192.168.0.1
+  bridge_ports bond0
+  bridge_stp on
+
+iface br0 inet static
+  address 192.168.0.143/24
