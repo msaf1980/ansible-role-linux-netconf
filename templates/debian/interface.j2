@@ -38,15 +38,26 @@ iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
 {%		endfor %}
 {%		if item['mtu'] is defined %}
   post-up {% for s in item['slaves'] %}ip link set dev {{ s }} mtu {{ item['mtu'] }} && {% endfor %}ip link set dev {{ item['name'] }} mtu {{ item['mtu'] }}
+
 {%		endif %}
+{%	elif interface_type == 'Bridge' %}
+{%		if item['ports'] is defined %}
+  bridge_ports{% for p in item['ports'] %} {{ p }}{% endfor %}
+
+{%		endif %}
+{%		if (item.stp is defined) and (item.stp == 'no' or item.stp == 'off') %}
+  bridge_stp off
+{%              else %}
+  bridge_stp on
+{%              endif %}
 {%	else %}
 {%		if item['mtu'] is defined %}
   mtu {{ item['mtu'] }}
 {%		endif %}
-{%	endif %}
-{%  if  item['ethtool'] is defined %}
+{%		if  item['ethtool'] is defined %}
   up sleep 5; ethtool -s {{ item['dev'] }} {{ item['ethtool'] }}
-{%  endif %}
+{%		endif %}
+{%	endif %}
 {%	if item['ip'] is defined and (item['method'] is undefined or item['method']|lower == "static" or item['method']|lower == "manual") %}
 
 iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
