@@ -112,6 +112,3 @@ bridge_interfaces:
     ipaddr: 192.168.0.142
     prefix: 24
     gw: 192.168.0.1
-    ip:
-      - ipaddr: 192.168.0.143
-        prefix: 24

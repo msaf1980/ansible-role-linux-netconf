@@ -1,4 +1,4 @@
 # Ansible managed
 # Any changes made here will be lost
 192.168.247.0/24 via dev bond1
-192.168.248.0/24 via 192.168.251.1
+192.168.248.0/24 via 192.168.251.1 dev bond1
