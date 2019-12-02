@@ -1,0 +1,5 @@
+Redhat: add support for up scripts
+Debian: persistent naming (with MAC)
+Debian: MAC clone
+Run tests in VM with real up/down intrfaces and verify results
+Test enable/disable interfaces

@@ -3,3 +3,4 @@
 auto eno1
 allow-hotplug eno1
 iface eno1 inet manual
+  up sleep 5; ethtool -s eno1 speed 1000 duplex full autoneg off

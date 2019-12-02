@@ -120,6 +120,15 @@
     - "{{ bond_interfaces | default([]) }}"
     - "{{ vlan_interfaces | default([]) }}"
 
+- name: Network | Removing staled routes
+  file: path="{{ rhbase_netconf_path }}/route-{{ item['name'] }}" state=absent
+  when: >
+        item['routes'] is undefined
+  with_items:
+    - "{{ interfaces | default([]) }}"
+    - "{{ bond_interfaces | default([]) }}"
+    - "{{ vlan_interfaces | default([]) }}"
+
 - name: Network | Restarting Network Bonds
   shell: bash -c "ifdown {{ item['item']['name'] }} && ifup {{ item['item']['name'] }}"
   become: true
@@ -187,6 +196,12 @@
     - not linux_netconf_simulate
   become: true
   with_items: "{{ config_removed['results'] }}"
+
+- name: Network | Cleanup routes for removed interfaces
+  file: path="{{ rhbase_netconf_path }}/route-{{ item['item'] }}" state=absent
+  with_items: "{{ config_removed['results'] }}"
+  when: >
+        config_removed['results'] is defined
 
 - name: Network | Remove Network Interfaces
   file: path={{ rhbase_netconf_path }}/ifcfg-{{ item['item'] }} state=absent

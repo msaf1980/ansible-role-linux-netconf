@@ -33,7 +33,7 @@ SLAVE=yes
 {%		endif %}
 {%	endif %}
 {%	if  item['ethtool'] is defined %}
-ETHTOOL_OPTS={{ item['ethtool'] }}
+ETHTOOL_OPTS="{{ item['ethtool'] }}"
 {%	endif %}
 {%	if interface_type == 'Bond' %}
 BONDING_OPTS="{% for opt in item['parameters'] %}{{ opt['param'] }}={{ opt['val'] }}{% if not loop.last %} {% endif %}{% endfor %}"

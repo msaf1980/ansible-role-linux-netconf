@@ -7,4 +7,3 @@ iface bond0 inet manual
   bond-mode balance-rr
   bond-arp-interval 200
   bond-arp-ip-target 192.168.0.1,192.168.0.250
-

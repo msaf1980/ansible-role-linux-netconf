@@ -73,19 +73,25 @@ interfaces:
     configure: true
     onboot: 'yes'
     # IPv4 settings
-    method: 'none'
+    method: 'static'
+    ipaddr: 192.168.0.140
+    prefix: 24
+    gateway: 192.168.0.1
     ip:
-      - ipaddr: 192.168.0.140
-        prefix: 24
-        gateway: 192.168.0.1
       - ipaddr: 192.168.0.143
         prefix: 24
 
 
+Static routes
+    ..
+    routes:
+      - to: 192.168.249.0/24
+      - to: 192.168.250.0/24
+        gw: 192.168.0.2
 
 
 Additional settings
-    ethtool: 'speed 1000 duplex full autoneg on'
+    ethtool: 'speed 1000 duplex full autoneg off'
     mtu: 9000
 
     # Auto re-configure interface when changed (by default: false)
@@ -120,7 +126,10 @@ bond_interfaces:
     slaves:
       - "eno1"
       - "eno2"
-    options: 'mode=active-backup primary=enp4s0f0 arp_interval=200 arp_ip_target=192.168.0.1,192.168.0.250'
+    parameters:
+      - { param: 'mode', val: 'active-backup' }
+      - { param: 'arp_interval', val: '200' }
+      - { param: 'arp_ip_target', val: '{{ lan_arp_ip_target }}' }
 
 -----------------------------------
 VLAN
@@ -147,10 +156,10 @@ bridge_interfaces:
       - 'bond0'
     method: 'static'
     zone: 'public'
+    ipaddr: 192.168.0.142
+    prefix: 24
+    gateway: 192.168.0.1
     ip:
-      - ipaddr: 192.168.0.142
-        prefix: 24
-        gateway: 192.168.0.1
       - ipaddr: 192.168.0.143
         prefix: 24
 
