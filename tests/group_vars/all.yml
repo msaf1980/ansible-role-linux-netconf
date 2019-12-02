@@ -37,7 +37,10 @@ bond_interfaces:
     dev: bond0
     type: 'Bond'
     bridge: 'br0'
-    parameters: 'mode=balance-rr arp_interval=200 arp_ip_target={{ lan_arp_ip_target }}'
+    parameters:
+      - { param: 'mode', val: 'balance-rr' }
+      - { param: 'arp_interval', val: '200' }
+      - { param: 'arp_ip_target', val: '{{ lan_arp_ip_target }}' }
     slaves:
       - 'eno1'
       - 'eno2'
@@ -51,7 +54,11 @@ bond_interfaces:
   - name: bond1
     dev: bond1
     type: 'Bond'
-    parameters: 'mode=802.3ad xmit_hash_policy=layer2+3 lacp_rate=1 miimon=100'
+    parameters:
+      - { param: 'mode', val: '802.3ad' }
+      - { param: 'xmit_hash_policy', val: 'layer2+3' }
+      - { param: 'lacp_rate', val: '1' }
+      - { param: 'miimon', val: '100' }
     slaves: [ 'enp4s0f0', 'enp4s0f1' ]
     method: 'static'
     ipaddr: 192.168.251.140

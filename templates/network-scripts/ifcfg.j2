@@ -36,7 +36,8 @@ SLAVE=yes
 ETHTOOL_OPTS={{ item['ethtool'] }}
 {%	endif %}
 {%	if interface_type == 'Bond' %}
-BONDING_OPTS="{{ item['parameters'] }}"
+BONDING_OPTS="{% for opt in item['parameters'] %}{{ opt['param'] }}={{ opt['val'] }}{% if not loop.last %} {% endif %}{% endfor %}"
+
 {%	elif interface_type == 'Bridge' %}
 {%		if (item.stp is defined) and (item.stp == 'no' or item.stp == 'off') %}
 STP=off
