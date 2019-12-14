@@ -43,6 +43,10 @@ STP=off
 {%		else %}
 STP=on
 {%		endif %}
+DELAY={{ item.delay|default(0) }}
+{%	endif %}
+{%	if (item.stp is defined) and (item.stp == 'no' or item.stp == 'off') %}
+DELAY=item.delay|default(0)
 {%	endif %}
 {%	if item['method'] is defined %}
 BOOTPROTO={{ item['method']|lower }}
@@ -53,7 +57,6 @@ IPV6INIT=no
 {%			for port in nbr['ports'] %}
 {%				if port == item['name'] %}
 BRIDGE={{ nbr['name'] }}
-DELAY=0
 {%				endif %}
 {%			endfor %}
 {%		endfor %}
