@@ -4,4 +4,4 @@
 auto lo
 iface lo inet loopback
 
-source /tmp/ifcfg-*
+source /tmp/interfaces.d/ifcfg-*

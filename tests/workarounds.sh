@@ -23,6 +23,7 @@ if [ -f /etc/redhat-release ]; then
        #[ -f /var/lib/ebtables/lock ] && rm  -f /var/lib/ebtables/lock
        # Not work, disable config SELinux/Firewalld
     #}
+#else if [ -f /etc/debian_version ]; then
 fi
 
 exit 0
