@@ -37,8 +37,7 @@ iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
   bond-{{ opt['param']|replace('_','-') }} {{ opt['val'] }}
 {%		endfor %}
 {%		if item['mtu'] is defined %}
-  post-up {% for s in item['slaves'] %}ip link set dev {{ s }} mtu {{ item['mtu'] }} && {% endfor %}ip link set dev {{ item['name'] }} mtu {{ item['mtu'] }}
-
+  up {% for s in item['slaves'] %}ip link set dev {{ s }} mtu {{ item['mtu'] }} && {% endfor %}ip link set dev {{ item['name'] }} mtu {{ item['mtu'] }}
 {%		endif %}
 {%	elif interface_type == 'Bridge' %}
 {%		if item['ports'] is defined %}
@@ -57,6 +56,30 @@ iface {{ item['name'] }} inet {{ item['method']|default('manual')|lower }}
 {%		if  item['ethtool'] is defined %}
   up sleep 5; ethtool -s {{ item['dev'] }} {{ item['ethtool'] }}
 {%		endif %}
+{%	endif %}
+{%	if item.method is defined and (item.method|lower == "static" or item.method|lower == "dhcp") %}
+{%		if item.dns is defined %}
+  dns-nameservers{% for ns in item.dns %} {{ ns }}{% endfor %}
+
+{%		endif %}
+{%		if item.search is defined %}
+  dns-search{% for s in item.search %} {{ s }}{% endfor %}
+
+{%		endif %}
+{%	endif %}
+{%	if item.routes is defined and item.method is defined and (item.method|lower == "static" or item.method|lower == "dhcp") %}
+{%		for route in item.routes %}
+{%			if route.gw is defined %}
+  up ip route add {{ route.to }} via {{ route.gw }} dev {{ item['dev'] }}{% if  item.vlan_id is defined %}.{{ item['vlan_id'] }}{%endif %}
+
+  down ip route del {{ route.to }} via {{ route.gw }} dev {{ item['dev'] }}{% if  item.vlan_id is defined %}.{{ item['vlan_id'] }}{%endif %}
+
+{%			else %}  up ip route add {{ route.to }} via dev {{ item.dev }}{% if  item.vlan_id is defined %}.{{ item['vlan_id'] }}{%endif %}
+
+  down ip route del {{ route.to }} via dev {{ item.dev }}{% if  item.vlan_id is defined %}.{{ item['vlan_id'] }}{%endif %}
+
+{%			endif %}
+{%		endfor %}
 {%	endif %}
 {%	if item['ip'] is defined and (item['method'] is undefined or item['method']|lower == "static" or item['method']|lower == "manual") %}
 

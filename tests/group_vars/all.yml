@@ -114,6 +114,9 @@ bridge_interfaces:
     ipaddr: 192.168.0.142
     prefix: 24
     gw: 192.168.0.1
+    gw: "{{ lan_gateway4 }}"
+    dns: "{{ lan_dns_servers }}"
+    search: "{{ lan_dns_search }}"
     ip:
       - ipaddr: 192.168.0.143
         prefix: 24
