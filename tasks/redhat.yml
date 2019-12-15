@@ -1,5 +1,17 @@
 ---
 
+- name: Network | Copy post-up/post-down scripts
+  copy:
+    src: "redhat/{{ item }}"
+    dest: "/sbin/{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  with_items:
+    - "ifup-local"
+    - "ifdown-local"
+
 - name: Network | Installing bridge-utils
   yum:
     name: "bridge-utils"

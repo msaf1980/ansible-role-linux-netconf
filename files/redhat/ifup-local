@@ -1,0 +1,6 @@
+#!/bin/sh
+
+SCRIPT="/etc/sysconfig/network-scripts/post-up-$1"
+if [ -x ${SCRIPT} ]; then
+    exec ${SCRIPT} $1
+fi
