@@ -1,2 +1,5 @@
+- hostname:
+    name: "{{ host_name }}"
+  when: host_name is defined
 - include_vars: "{{ ansible_os_family | lower }}.yml"
 - include: "{{ ansible_os_family | lower }}.yml"
